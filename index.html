@@ -2,472 +2,451 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>artist spotlight //</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
   <style>
-    /* ── RESET & TOKENS ───────────────────────────────────────────── */
+    /* ── RESET ───────────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #0a0a0a;
-      --surface:   #111111;
-      --border:    #1f1f1f;
-      --border-hi: #2e2e2e;
-      --accent:    #c8ff00;       /* lime */
-      --accent2:   #ff4d6d;       /* coral */
-      --text:      #e8e8e8;
-      --muted:     #555;
-      --mono: 'Ensemble Mono', 'Fira Code', 'Courier New', monospace;
-      --sans: 'Hanken Grotesk', sans-serif;
-      --radius: 2px;
-      --transition: 120ms ease;
+      --bg:        #f7f6f3;
+      --surface:   #ffffff;
+      --border:    #e2e0db;
+      --border-hi: #ccc9c2;
+      --accent:    #1a1a1a;
+      --accent2:   #d4380d;
+      --text:      #1a1a1a;
+      --muted:     #888;
+      --pill-bg:   #efefec;
+      --mono: 'Share Tech Mono', 'Fira Code', monospace;
+      --radius: 6px;
+      --transition: 140ms ease;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    /* Ensemble Mono via Google Fonts embed fallback */
-    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-    :root { --mono: 'Share Tech Mono', 'Fira Code', monospace; }
+    html, body { height: 100%; }
 
     body {
       font-family: var(--mono);
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
-    }
-
-    /* ── NOISE OVERLAY ───────────────────────────────────────────── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 1000;
-      opacity: 0.5;
+      -webkit-font-smoothing: antialiased;
+      padding-top: var(--safe-top);
     }
 
     /* ── HEADER ──────────────────────────────────────────────────── */
     header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      padding: 28px 36px 20px;
+      background: var(--surface);
       border-bottom: 1px solid var(--border);
+      padding: 14px 16px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
     .wordmark {
-      font-family: var(--mono);
-      font-size: 13px;
-      letter-spacing: 0.12em;
-      color: var(--accent);
-      text-transform: uppercase;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      color: var(--text);
     }
     .wordmark span { color: var(--muted); }
 
-    .header-meta {
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    /* ── LAYOUT ──────────────────────────────────────────────────── */
-    main {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      grid-template-rows: 1fr;
-      height: calc(100vh - 62px);
-    }
-
-    /* ── SIDEBAR ─────────────────────────────────────────────────── */
-    aside {
-      border-right: 1px solid var(--border);
-      padding: 28px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
-      overflow-y: auto;
-    }
-
-    .section-label {
-      font-size: 9px;
-      letter-spacing: 0.2em;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    /* ── BUTTONS ─────────────────────────────────────────────────── */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 10px 16px;
-      border: 1px solid var(--border-hi);
-      background: transparent;
-      color: var(--text);
-      cursor: pointer;
-      border-radius: var(--radius);
-      transition: all var(--transition);
-      width: 100%;
-      justify-content: center;
-    }
-
-    .btn:hover:not(:disabled) {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: rgba(200, 255, 0, 0.04);
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #000;
-      border-color: var(--accent);
-      font-weight: 600;
-    }
-    .btn-primary:hover:not(:disabled) {
-      background: #d6ff1a;
-      color: #000;
-      border-color: #d6ff1a;
-    }
-
-    .btn-danger {
-      border-color: var(--accent2);
-      color: var(--accent2);
-    }
-    .btn-danger:hover:not(:disabled) {
-      background: rgba(255, 77, 109, 0.08);
-    }
-
-    .btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-    /* ── INPUTS ──────────────────────────────────────────────────── */
-    .input-wrap { position: relative; }
-
-    input[type="text"], select {
-      width: 100%;
-      font-family: var(--mono);
-      font-size: 12px;
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border-hi);
-      border-radius: var(--radius);
-      padding: 10px 12px;
-      outline: none;
-      transition: border-color var(--transition);
-      -webkit-appearance: none;
-      appearance: none;
-    }
-
-    input[type="text"]:focus, select:focus {
-      border-color: var(--accent);
-    }
-
-    input[type="text"]::placeholder { color: var(--muted); }
-
-    .search-row {
-      display: flex;
-      gap: 4px;
-    }
-
-    .search-row input { border-radius: var(--radius) 0 0 var(--radius); }
-
-    .search-row .btn {
-      width: auto;
-      padding: 10px 14px;
-      border-radius: 0 var(--radius) var(--radius) 0;
-      flex-shrink: 0;
-    }
-
-    select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      padding-right: 32px;
-    }
-
-    /* ── STATUS PILL ─────────────────────────────────────────────── */
-    .status {
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+    .header-right {
       display: flex;
       align-items: center;
       gap: 7px;
     }
 
     .status-dot {
-      width: 6px;
-      height: 6px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      background: var(--muted);
+      background: var(--border-hi);
       flex-shrink: 0;
     }
+    .status-dot.ok   { background: #52c41a; box-shadow: 0 0 0 2px rgba(82,196,26,0.2); }
+    .status-dot.busy { background: #faad14; animation: blink 0.9s ease-in-out infinite alternate; }
+    .status-dot.err  { background: var(--accent2); }
 
-    .status-dot.ok { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-    .status-dot.busy {
-      background: #ffbe0b;
-      animation: pulse 1s ease-in-out infinite alternate;
-    }
-    .status-dot.err { background: var(--accent2); }
+    @keyframes blink { from { opacity: 1; } to { opacity: 0.2; } }
 
-    @keyframes pulse { from { opacity: 1; } to { opacity: 0.3; } }
-
-    /* ── COMMIT BLOCK ────────────────────────────────────────────── */
-    .commit-block {
-      border: 1px solid var(--border-hi);
-      border-radius: var(--radius);
-      padding: 14px;
-    }
-
-    .commit-target {
-      font-size: 11px;
-      color: var(--muted);
-      margin-bottom: 10px;
-      word-break: break-all;
-    }
-
-    .commit-target strong { color: var(--accent); display: block; margin-top: 2px; }
-
-    /* ── CONTENT AREA ────────────────────────────────────────────── */
-    .content {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .content-header {
-      padding: 18px 28px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      flex-shrink: 0;
-    }
-
-    .artist-name {
-      font-size: 22px;
-      letter-spacing: -0.01em;
-      color: var(--text);
-    }
-
-    .track-count {
-      font-size: 11px;
+    .header-status {
+      font-size: 10px;
       letter-spacing: 0.1em;
       color: var(--muted);
       text-transform: uppercase;
     }
 
-    /* ── TABLE ───────────────────────────────────────────────────── */
-    .table-wrap {
+    /* ── MAIN ────────────────────────────────────────────────────── */
+    main {
       flex: 1;
       overflow-y: auto;
-    }
-
-    table {
+      -webkit-overflow-scrolling: touch;
+      padding: 14px 14px calc(24px + var(--safe-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 560px;
       width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
+      margin: 0 auto;
     }
 
-    thead {
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 10;
+    /* ── CARDS ───────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
     }
 
-    th {
-      text-align: left;
+    .card-label {
       font-size: 9px;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.22em;
+      color: var(--muted);
       text-transform: uppercase;
-      color: var(--muted);
-      padding: 10px 28px;
-      border-bottom: 1px solid var(--border);
-      font-weight: 400;
+      margin-bottom: 10px;
     }
 
-    td {
-      padding: 11px 28px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-    }
-
-    tr:hover td { background: rgba(255,255,255,0.02); }
-
-    .tr-idx {
-      color: var(--muted);
-      font-size: 10px;
-      width: 40px;
+    /* ── BUTTONS ─────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 12px 16px;
+      border: 1px solid var(--border-hi);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      border-radius: var(--radius);
+      transition: all var(--transition);
+      width: 100%;
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
 
-    .td-track { color: var(--text); max-width: 260px; }
-    .td-artists { color: var(--muted); max-width: 200px; }
-    .td-album { color: var(--muted); font-size: 11px; max-width: 180px; }
-    .td-release { color: var(--muted); white-space: nowrap; }
+    .btn:active:not(:disabled) { transform: scale(0.98); opacity: 0.8; }
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    .td-pop {
-      width: 80px;
-    }
-
-    .pop-bar {
-      height: 3px;
-      background: var(--border-hi);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .pop-bar-fill {
-      height: 100%;
+    .btn-primary {
       background: var(--accent);
-      border-radius: 2px;
+      color: #fff;
+      border-color: var(--accent);
     }
 
-    .truncate {
+    .btn-danger {
+      color: var(--accent2);
+      border-color: var(--accent2);
+    }
+
+    /* ── INPUTS ──────────────────────────────────────────────────── */
+    input[type="text"], select {
+      width: 100%;
+      font-family: var(--mono);
+      font-size: 14px;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border-hi);
+      border-radius: var(--radius);
+      padding: 12px;
+      outline: none;
+      transition: border-color var(--transition);
+      -webkit-appearance: none;
+      appearance: none;
+      min-height: 44px;
+    }
+
+    input[type="text"]:focus, select:focus { border-color: var(--accent); }
+    input[type="text"]::placeholder { color: var(--muted); font-size: 13px; }
+
+    .search-row { display: flex; }
+
+    .search-row input {
+      flex: 1;
+      border-radius: var(--radius) 0 0 var(--radius);
+      border-right: none;
+    }
+
+    .search-row .btn {
+      width: auto;
+      padding: 12px 18px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      flex-shrink: 0;
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+
+    /* ── FILTER PILLS ────────────────────────────────────────────── */
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      padding: 8px 13px;
+      border: 1px solid var(--border-hi);
+      border-radius: 20px;
+      background: var(--pill-bg);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all var(--transition);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      min-height: 36px;
+    }
+
+    .filter-toggle input[type="checkbox"] { display: none; }
+
+    .filter-toggle.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .filter-toggle:active { transform: scale(0.95); }
+
+    /* ── COMMIT META ─────────────────────────────────────────────── */
+    .commit-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      line-height: 1.7;
+    }
+    .commit-meta strong { color: var(--text); }
+
+    /* ── RESULTS HEADER ──────────────────────────────────────────── */
+    .results-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .results-artist {
+      font-size: 18px;
+      letter-spacing: -0.01em;
+    }
+
+    .results-count {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* ── TRACK LIST ──────────────────────────────────────────────── */
+    .track-item {
+      display: grid;
+      grid-template-columns: 26px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .track-item:last-child { border-bottom: none; }
+
+    .track-idx {
+      font-size: 10px;
+      color: var(--border-hi);
+      text-align: right;
+    }
+
+    .track-info { overflow: hidden; }
+
+    .track-name {
+      font-size: 13px;
+      color: var(--text);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    /* ── EMPTY / LOADING STATES ──────────────────────────────────── */
+    .track-sub {
+      font-size: 10px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+
+    .track-year {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .badge-feat {
+      display: inline-block;
+      font-size: 8px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #fff7e6;
+      color: #d46b08;
+      border: 1px solid #ffd591;
+      border-radius: 3px;
+      padding: 1px 4px;
+      margin-left: 5px;
+      vertical-align: middle;
+      line-height: 1.7;
+    }
+
+    /* ── EMPTY / LOADING ─────────────────────────────────────────── */
     .empty-state {
-      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      padding: 52px 16px;
+      gap: 10px;
       color: var(--muted);
-      font-size: 12px;
-      letter-spacing: 0.1em;
+      font-size: 11px;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
+      text-align: center;
     }
 
-    .empty-glyph {
-      font-size: 32px;
-      opacity: 0.15;
-    }
+    .empty-glyph { font-size: 28px; opacity: 0.18; }
 
     /* ── TOAST ───────────────────────────────────────────────────── */
     #toast-container {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
+      bottom: calc(16px + var(--safe-bottom));
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
       flex-direction: column;
+      align-items: center;
       gap: 8px;
       z-index: 9999;
+      pointer-events: none;
+      width: calc(100% - 32px);
+      max-width: 400px;
     }
 
     .toast {
       font-family: var(--mono);
       font-size: 11px;
-      letter-spacing: 0.08em;
-      background: var(--surface);
-      border: 1px solid var(--border-hi);
-      padding: 10px 16px;
-      border-radius: var(--radius);
-      color: var(--text);
-      animation: slideIn 200ms ease forwards;
-      max-width: 320px;
+      letter-spacing: 0.06em;
+      background: #1a1a1a;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 20px;
+      animation: toastIn 180ms ease forwards;
+      text-align: center;
+      width: 100%;
     }
 
-    .toast.ok { border-left: 3px solid var(--accent); }
-    .toast.err { border-left: 3px solid var(--accent2); }
-    .toast.info { border-left: 3px solid #ffbe0b; }
+    .toast.err  { background: var(--accent2); }
+    .toast.ok   { background: #237804; }
 
-    @keyframes slideIn {
-      from { transform: translateX(20px); opacity: 0; }
-      to   { transform: translateX(0); opacity: 1; }
+    @keyframes toastIn {
+      from { transform: translateY(6px); opacity: 0; }
+      to   { transform: translateY(0);   opacity: 1; }
     }
 
-    /* ── SCROLLBAR ───────────────────────────────────────────────── */
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    /* ── UTILS ───────────────────────────────────────────────────── */
+    .hidden { display: none !important; }
+
+    ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
-
-    /* ── RESPONSIVE ──────────────────────────────────────────────── */
-    @media (max-width: 700px) {
-      main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-      aside { border-right: none; border-bottom: 1px solid var(--border); padding: 16px; }
-    }
   </style>
 </head>
 <body>
 
-<!-- ── HEADER ──────────────────────────────────────────────────────────── -->
 <header>
   <div class="wordmark">artist spotlight <span>//</span></div>
-  <div class="header-meta" id="header-status">not connected</div>
+  <div class="header-right">
+    <div class="status-dot" id="status-dot"></div>
+    <div class="header-status" id="header-status">not connected</div>
+  </div>
 </header>
 
-<!-- ── MAIN ────────────────────────────────────────────────────────────── -->
 <main>
 
-  <!-- SIDEBAR -->
-  <aside>
+  <!-- LOGIN -->
+  <div class="card" id="login-card">
+    <div class="card-label">Auth</div>
+    <button class="btn btn-primary" id="login-btn">↗ Connect Spotify</button>
+  </div>
 
-    <!-- Status -->
-    <div>
-      <div class="section-label">Connection</div>
-      <div class="status">
-        <div class="status-dot" id="status-dot"></div>
-        <span id="status-text">Awaiting login</span>
-      </div>
+  <!-- SEARCH -->
+  <div class="card hidden" id="search-card">
+    <div class="card-label">Artist Search</div>
+    <div class="search-row">
+      <input type="text" id="artist-input" placeholder="search an artist…"
+             autocomplete="off" autocorrect="off" spellcheck="false" />
+      <button class="btn btn-primary" id="search-btn">→</button>
     </div>
+  </div>
 
-    <!-- Login -->
-    <div id="login-block">
-      <div class="section-label">Auth</div>
-      <button class="btn btn-primary" id="login-btn">
-        ↗ Connect Spotify
-      </button>
+  <!-- FILTERS -->
+  <div class="card hidden" id="filter-card">
+    <div class="card-label">Filters</div>
+    <div class="filters">
+      <label class="filter-toggle" id="toggle-feat">
+        <input type="checkbox" id="filter-feat" />
+        ✦ Features only
+      </label>
+      <label class="filter-toggle" id="toggle-yr">
+        <input type="checkbox" id="filter-yr" />
+        ↺ Last 12 months
+      </label>
     </div>
+  </div>
 
-    <!-- Search -->
-    <div id="search-block" style="display:none">
-      <div class="section-label">Artist Search</div>
-      <div class="search-row">
-        <input type="text" id="artist-input" placeholder="e.g. Floating Points" autocomplete="off" />
-        <button class="btn" id="search-btn">→</button>
-      </div>
+  <!-- PLAYLIST -->
+  <div class="card hidden" id="playlist-card">
+    <div class="card-label">Target Playlist</div>
+    <select id="playlist-select">
+      <option value="">— select a playlist —</option>
+    </select>
+  </div>
+
+  <!-- COMMIT -->
+  <div class="card hidden" id="commit-card">
+    <div class="card-label">Commit</div>
+    <div class="commit-meta">
+      Replace <strong id="commit-target-name">—</strong> with
+      <strong id="commit-track-count">—</strong> tracks
+      from <strong id="commit-artist-name">—</strong>
     </div>
+    <button class="btn btn-danger" id="commit-btn" disabled>⚡ Replace playlist</button>
+  </div>
 
-    <!-- Playlist -->
-    <div id="playlist-block" style="display:none">
-      <div class="section-label">Target Playlist</div>
-      <select id="playlist-select">
-        <option value="">— select —</option>
-      </select>
-    </div>
-
-    <!-- Commit -->
-    <div id="commit-block" style="display:none">
-      <div class="section-label">Commit</div>
-      <div class="commit-block">
-        <div class="commit-target">
-          Replace contents of:<br/>
-          <strong id="commit-target-name">—</strong>
-        </div>
-        <button class="btn btn-danger" id="commit-btn" disabled>⚡ Replace Playlist</button>
-      </div>
-    </div>
-
-  </aside>
-
-  <!-- CONTENT -->
-  <div class="content" id="content-area">
+  <!-- RESULTS -->
+  <div id="results-area">
     <div class="empty-state" id="empty-state">
       <div class="empty-glyph">♫</div>
       <div>connect spotify to begin</div>
@@ -476,14 +455,10 @@
 
 </main>
 
-<!-- ── TOASTS ───────────────────────────────────────────────────────────── -->
 <div id="toast-container"></div>
 
-<!-- ── SCRIPT ───────────────────────────────────────────────────────────── -->
 <script>
-// ── CONFIG ──────────────────────────────────────────────────────────────────
-// !! REPLACE with your actual Spotify app Client ID !!
-// !! Add your GitHub Pages URL as a Redirect URI in the Spotify dashboard !!
+// ── CONFIG ────────────────────────────────────────────────────────────────────
 const CLIENT_ID    = 'd2dff7d2d9964cf0ab6bc799a979b24d';
 const REDIRECT_URI = window.location.origin + window.location.pathname;
 const SCOPES       = [
@@ -493,31 +468,38 @@ const SCOPES       = [
   'playlist-modify-private'
 ].join(' ');
 
-// ── STATE ────────────────────────────────────────────────────────────────────
-let authToken    = null;
-let playlists    = [];
-let artistTracks = [];
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let authToken         = null;
+let playlists         = [];
+let allArtistTracks   = [];
+let artistTracks      = [];
+let currentArtistId   = '';
 let currentArtistName = '';
 
-// ── DOM REFS ──────────────────────────────────────────────────────────────────
+// ── DOM ───────────────────────────────────────────────────────────────────────
+const $loginCard      = document.getElementById('login-card');
 const $loginBtn       = document.getElementById('login-btn');
-const $searchBlock    = document.getElementById('search-block');
-const $playlistBlock  = document.getElementById('playlist-block');
-const $commitBlock    = document.getElementById('commit-block');
+const $searchCard     = document.getElementById('search-card');
+const $filterCard     = document.getElementById('filter-card');
+const $playlistCard   = document.getElementById('playlist-card');
+const $commitCard     = document.getElementById('commit-card');
 const $artistInput    = document.getElementById('artist-input');
 const $searchBtn      = document.getElementById('search-btn');
 const $playlistSelect = document.getElementById('playlist-select');
 const $commitBtn      = document.getElementById('commit-btn');
 const $commitTarget   = document.getElementById('commit-target-name');
+const $commitCount    = document.getElementById('commit-track-count');
+const $commitArtist   = document.getElementById('commit-artist-name');
 const $statusDot      = document.getElementById('status-dot');
-const $statusText     = document.getElementById('status-text');
 const $headerStatus   = document.getElementById('header-status');
-const $contentArea    = document.getElementById('content-area');
-const $emptyState     = document.getElementById('empty-state');
-const $loginBlock     = document.getElementById('login-block');
+const $resultsArea    = document.getElementById('results-area');
+const $filterFeat     = document.getElementById('filter-feat');
+const $filterYr       = document.getElementById('filter-yr');
+const $toggleFeat     = document.getElementById('toggle-feat');
+const $toggleYr       = document.getElementById('toggle-yr');
 
-// ── TOAST ────────────────────────────────────────────────────────────────────
-function toast(msg, type = 'info', duration = 3500) {
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function toast(msg, type = 'info', duration = 3000) {
   const el = document.createElement('div');
   el.className = `toast ${type}`;
   el.textContent = msg;
@@ -528,39 +510,36 @@ function toast(msg, type = 'info', duration = 3500) {
 // ── STATUS ────────────────────────────────────────────────────────────────────
 function setStatus(state, text) {
   $statusDot.className = 'status-dot ' + state;
-  $statusText.textContent = text;
-  if (state === 'ok') $headerStatus.textContent = 'connected';
-  else if (state === 'busy') $headerStatus.textContent = 'working...';
-  else $headerStatus.textContent = 'not connected';
+  $headerStatus.textContent = text;
 }
 
 // ── AUTH (PKCE) ───────────────────────────────────────────────────────────────
 async function generateCodeVerifier() {
-  const array = new Uint8Array(64);
-  crypto.getRandomValues(array);
-  return btoa(String.fromCharCode(...array))
+  const arr = new Uint8Array(64);
+  crypto.getRandomValues(arr);
+  return btoa(String.fromCharCode(...arr))
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
 async function generateCodeChallenge(verifier) {
-  const data = new TextEncoder().encode(verifier);
+  const data   = new TextEncoder().encode(verifier);
   const digest = await crypto.subtle.digest('SHA-256', data);
   return btoa(String.fromCharCode(...new Uint8Array(digest)))
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
 $loginBtn.addEventListener('click', async () => {
-  const verifier   = await generateCodeVerifier();
-  const challenge  = await generateCodeChallenge(verifier);
+  const verifier  = await generateCodeVerifier();
+  const challenge = await generateCodeChallenge(verifier);
   sessionStorage.setItem('pkce_verifier', verifier);
 
   const url = new URL('https://accounts.spotify.com/authorize');
-  url.searchParams.set('client_id', CLIENT_ID);
-  url.searchParams.set('response_type', 'code');
-  url.searchParams.set('redirect_uri', REDIRECT_URI);
-  url.searchParams.set('scope', SCOPES);
+  url.searchParams.set('client_id',             CLIENT_ID);
+  url.searchParams.set('response_type',         'code');
+  url.searchParams.set('redirect_uri',          REDIRECT_URI);
+  url.searchParams.set('scope',                 SCOPES);
   url.searchParams.set('code_challenge_method', 'S256');
-  url.searchParams.set('code_challenge', challenge);
+  url.searchParams.set('code_challenge',        challenge);
   window.location = url.toString();
 });
 
@@ -582,13 +561,9 @@ async function exchangeCodeForToken(code) {
 
   if (!res.ok) throw new Error('Token exchange failed');
   const data = await res.json();
-
-  // Store token + expiry
-  authToken = data.access_token;
-  const expiry = Date.now() + data.expires_in * 1000;
-  sessionStorage.setItem('spotify_token', authToken);
-  sessionStorage.setItem('spotify_token_expiry', expiry);
-
+  authToken  = data.access_token;
+  sessionStorage.setItem('spotify_token',        authToken);
+  sessionStorage.setItem('spotify_token_expiry', Date.now() + data.expires_in * 1000);
   return authToken;
 }
 
@@ -601,13 +576,14 @@ function getStoredToken() {
 
 async function onAuth(token) {
   authToken = token;
-  $loginBlock.style.display = 'none';
-  $searchBlock.style.display = '';
-  $playlistBlock.style.display = '';
-  $commitBlock.style.display = '';
-  setStatus('busy', 'Loading playlists…');
+  $loginCard.classList.add('hidden');
+  $searchCard.classList.remove('hidden');
+  $filterCard.classList.remove('hidden');
+  $playlistCard.classList.remove('hidden');
+  $commitCard.classList.remove('hidden');
+  setStatus('busy', 'loading…');
   await loadPlaylists();
-  setStatus('ok', 'Connected');
+  setStatus('ok', 'connected');
   toast('Spotify connected ✓', 'ok');
 }
 
@@ -618,10 +594,10 @@ async function loadPlaylists() {
   while (url) {
     const res  = await spotifyGet(url);
     const data = await res.json();
-    playlists.push(...data.items.filter(p => p.owner.id !== 'spotify'));
+    playlists.push(...(data.items || []).filter(p => p?.owner?.id !== 'spotify'));
     url = data.next;
   }
-  $playlistSelect.innerHTML = '<option value="">— select playlist —</option>';
+  $playlistSelect.innerHTML = '<option value="">— select a playlist —</option>';
   playlists.forEach(p => {
     const opt = document.createElement('option');
     opt.value = p.id;
@@ -630,116 +606,139 @@ async function loadPlaylists() {
   });
 }
 
-$playlistSelect.addEventListener('change', () => {
+$playlistSelect.addEventListener('change', updateCommitPanel);
+
+function updateCommitPanel() {
   const p = playlists.find(x => x.id === $playlistSelect.value);
-  if (p) {
+  if (p && artistTracks.length > 0) {
     $commitTarget.textContent = p.name;
-    $commitBtn.disabled = artistTracks.length === 0;
+    $commitArtist.textContent = currentArtistName;
+    $commitCount.textContent  = artistTracks.length;
+    $commitBtn.disabled       = false;
   } else {
     $commitTarget.textContent = '—';
-    $commitBtn.disabled = true;
+    $commitArtist.textContent = '—';
+    $commitCount.textContent  = '—';
+    $commitBtn.disabled       = true;
   }
+}
+
+// ── FILTERS ───────────────────────────────────────────────────────────────────
+[$toggleFeat, $toggleYr].forEach(toggle => {
+  toggle.addEventListener('click', () => {
+    const cb = toggle.querySelector('input[type="checkbox"]');
+    cb.checked = !cb.checked;
+    toggle.classList.toggle('active', cb.checked);
+    if (allArtistTracks.length > 0) applyFiltersAndRender();
+  });
 });
 
-// ── SEARCH ───────────────────────────────────────────────────────────────────
+function applyFiltersAndRender() {
+  const onlyFeat = $filterFeat.checked;
+  const lastYr   = $filterYr.checked;
+  const cutoff   = new Date();
+  cutoff.setFullYear(cutoff.getFullYear() - 1);
+
+  artistTracks = allArtistTracks.filter(t => {
+    // Features only: artist is NOT the primary (first) artist on the track
+    if (onlyFeat && t.artists[0]?.id === currentArtistId) return false;
+    // Last 12 months
+    if (lastYr && new Date(t.album.release_date) < cutoff) return false;
+    return true;
+  });
+
+  renderResults();
+  updateCommitPanel();
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────────────────
 $searchBtn.addEventListener('click', doSearch);
-$artistInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+$artistInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { $artistInput.blur(); doSearch(); }
+});
 
 async function doSearch() {
   const query = $artistInput.value.trim();
   if (!query || !authToken) return;
 
-  setStatus('busy', 'Searching…');
+  setStatus('busy', 'searching…');
   $searchBtn.disabled = true;
   showLoading();
 
   try {
-    // 1. Find artist ID
-    const artistRes  = await spotifyGet(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=artist&limit=1`);
-    const artistData = await artistRes.json();
-    const artist     = artistData.artists?.items?.[0];
+    // 1. Resolve artist ID
+    const aRes  = await spotifyGet(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=artist&limit=1`);
+    const aData = await aRes.json();
+    const artist = aData.artists?.items?.[0];
     if (!artist) { toast('Artist not found', 'err'); showEmpty('No results found'); return; }
 
-    const artistId   = artist.id;
+    currentArtistId   = artist.id;
     currentArtistName = artist.name;
 
-    // 2. Paginate track search — collect all pages
-    let allTracks = [];
-    let offset    = 0;
-
+    // 2. Paginate track search
+    let raw = [], offset = 0;
     while (true) {
-      const r = await spotifyGet(
-        `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=50&offset=${offset}`
-      );
-      const d = await r.json();
+      const r    = await spotifyGet(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=50&offset=${offset}`);
+      const d    = await r.json();
       const items = d.tracks?.items || [];
-      allTracks.push(...items);
-      if (items.length < 50 || allTracks.length >= 1000) break;
+      raw.push(...items);
+      if (items.length < 50 || raw.length >= 1000) break;
       offset += 50;
     }
 
-    // 3. Filter to artist + deduplicate by name (keep newest)
+    // 3. Filter to artist, deduplicate by name keeping newest
     const seen = new Map();
-    allTracks
-      .filter(t => t.artists.some(a => a.id === artistId))
-      .filter(t => !t.album.artists.some(a => a.name === 'Various Artists'))
-      .sort((a, b) => b.album.release_date.localeCompare(a.album.release_date))
-      .forEach(t => {
-        const key = t.name.toLowerCase();
-        if (!seen.has(key)) seen.set(key, t);
-      });
+    raw
+      .filter(t => t.artists.some(a => a.id === currentArtistId))
+      .filter(t => !t.album?.artists?.some(a => a.name === 'Various Artists'))
+      .sort((a, b) => (b.album.release_date || '').localeCompare(a.album.release_date || ''))
+      .forEach(t => { const k = t.name.toLowerCase(); if (!seen.has(k)) seen.set(k, t); });
 
-    artistTracks = [...seen.values()];
-    renderTable();
-    setStatus('ok', 'Connected');
-    toast(`Found ${artistTracks.length} tracks`, 'ok');
-
-    if ($playlistSelect.value) $commitBtn.disabled = false;
+    allArtistTracks = [...seen.values()];
+    applyFiltersAndRender();
+    setStatus('ok', 'connected');
+    toast(`Found ${allArtistTracks.length} tracks`, 'ok');
   } catch (err) {
     console.error(err);
-    toast('Search failed — check console', 'err');
-    setStatus('err', 'Error');
+    toast('Search failed', 'err');
+    setStatus('err', 'error');
     showEmpty('Search failed');
   } finally {
     $searchBtn.disabled = false;
   }
 }
 
-// ── COMMIT ───────────────────────────────────────────────────────────────────
+// ── COMMIT ────────────────────────────────────────────────────────────────────
 $commitBtn.addEventListener('click', async () => {
-  const playlistId = $playlistSelect.value;
-  if (!playlistId || !artistTracks.length) return;
-
+  const playlistId   = $playlistSelect.value;
   const playlistName = playlists.find(p => p.id === playlistId)?.name;
+  if (!playlistId || !artistTracks.length) return;
   if (!confirm(`Replace all tracks in "${playlistName}" with ${artistTracks.length} tracks from ${currentArtistName}?`)) return;
 
-  setStatus('busy', 'Replacing playlist…');
+  setStatus('busy', 'updating…');
   $commitBtn.disabled = true;
 
   try {
-    // 1. Delete existing tracks (max 100 at a time)
     const existing = await fetchAllPlaylistTracks(playlistId);
     for (let i = 0; i < existing.length; i += 100) {
       const chunk = existing.slice(i, i + 100).map(t => ({ uri: t.track.uri }));
       await spotifyDelete(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, { tracks: chunk });
     }
 
-    // 2. Add new tracks (max 100 at a time)
     const uris = artistTracks.map(t => t.uri);
     for (let i = 0; i < uris.length; i += 100) {
-      const chunk = uris.slice(i, i + 100);
       await spotifyPost(
-        `https://api.spotify.com/v1/playlists/${playlistId}/tracks?uris=${chunk.join(',')}`,
+        `https://api.spotify.com/v1/playlists/${playlistId}/tracks?uris=${uris.slice(i, i + 100).join(',')}`,
         {}
       );
     }
 
-    toast(`✓ "${playlistName}" updated with ${uris.length} tracks`, 'ok', 5000);
-    setStatus('ok', 'Connected');
+    toast(`✓ "${playlistName}" updated (${uris.length} tracks)`, 'ok', 4000);
+    setStatus('ok', 'connected');
   } catch (err) {
     console.error(err);
-    toast('Commit failed — check console', 'err');
-    setStatus('err', 'Error');
+    toast('Commit failed', 'err');
+    setStatus('err', 'error');
   } finally {
     $commitBtn.disabled = false;
   }
@@ -750,133 +749,110 @@ async function fetchAllPlaylistTracks(playlistId) {
   while (url) {
     const r = await spotifyGet(url);
     const d = await r.json();
-    all.push(...d.items.filter(i => i.track));
+    all.push(...(d.items || []).filter(i => i?.track));
     url = d.next;
   }
   return all;
 }
 
-// ── RENDER TABLE ──────────────────────────────────────────────────────────────
-function renderTable() {
-  $contentArea.innerHTML = `
-    <div class="content-header">
-      <div class="artist-name">${escHtml(currentArtistName)}</div>
-      <div class="track-count">${artistTracks.length} tracks</div>
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderResults() {
+  if (artistTracks.length === 0) {
+    showEmpty(allArtistTracks.length > 0 ? 'No tracks match current filters' : 'No results');
+    return;
+  }
+
+  const rows = artistTracks.map((t, i) => {
+    const artistNames = t.artists.map(a => a.name).join(', ');
+    const isFeat      = t.artists[0]?.id !== currentArtistId;
+    const year        = t.album.release_date?.slice(0, 4) ?? '—';
+
+    return `
+      <div class="track-item">
+        <div class="track-idx">${i + 1}</div>
+        <div class="track-info">
+          <div class="track-name">
+            ${escHtml(t.name)}${isFeat ? '<span class="badge-feat">feat</span>' : ''}
+          </div>
+          <div class="track-sub">${escHtml(artistNames)}</div>
+        </div>
+        <div class="track-year">${year}</div>
+      </div>
+    `;
+  }).join('');
+
+  $resultsArea.innerHTML = `
+    <div class="results-header">
+      <div class="results-artist">${escHtml(currentArtistName)}</div>
+      <div class="results-count">${artistTracks.length} tracks</div>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Track</th>
-            <th>Artists</th>
-            <th>Album</th>
-            <th>Released</th>
-            <th>Pop.</th>
-          </tr>
-        </thead>
-        <tbody id="track-tbody"></tbody>
-      </table>
+    <div class="card" style="padding: 0 14px;">
+      ${rows}
     </div>
   `;
 
-  const tbody = document.getElementById('track-tbody');
-  artistTracks.forEach((t, i) => {
-    const artists = t.artists.map(a => a.name).join(', ');
-    const pop     = t.popularity;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="tr-idx">${i + 1}</td>
-      <td class="td-track truncate">${escHtml(t.name)}</td>
-      <td class="td-artists truncate">${escHtml(artists)}</td>
-      <td class="td-album truncate">${escHtml(t.album.name)}</td>
-      <td class="td-release">${t.album.release_date?.slice(0,4) ?? '—'}</td>
-      <td class="td-pop">
-        <div class="pop-bar"><div class="pop-bar-fill" style="width:${pop}%"></div></div>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
+  updateCommitPanel();
 }
 
 function showLoading() {
-  $contentArea.innerHTML = `
+  $resultsArea.innerHTML = `
     <div class="empty-state">
-      <div class="empty-glyph" style="animation:pulse 1s ease-in-out infinite alternate">♫</div>
-      <div>searching...</div>
-    </div>
-  `;
+      <div class="empty-glyph" style="animation:blink 0.8s ease-in-out infinite alternate">♫</div>
+      <div>searching…</div>
+    </div>`;
 }
 
 function showEmpty(msg = 'connect spotify to begin') {
-  $contentArea.innerHTML = `
+  $resultsArea.innerHTML = `
     <div class="empty-state">
       <div class="empty-glyph">♫</div>
       <div>${msg}</div>
-    </div>
-  `;
+    </div>`;
 }
 
-// ── SPOTIFY API HELPERS ───────────────────────────────────────────────────────
+// ── SPOTIFY HELPERS ───────────────────────────────────────────────────────────
 function spotifyGet(url) {
   return fetch(url, { headers: { Authorization: `Bearer ${authToken}` } });
 }
-
 function spotifyPost(url, body) {
   return fetch(url, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${authToken}`,
-      'Content-Type': 'application/json'
-    },
+    headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
 }
-
 function spotifyDelete(url, body) {
   return fetch(url, {
     method: 'DELETE',
-    headers: {
-      Authorization: `Bearer ${authToken}`,
-      'Content-Type': 'application/json'
-    },
+    headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
 }
-
 function escHtml(str) {
   return String(str ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 (async () => {
-  // Check if returning from Spotify with ?code=
   const params = new URLSearchParams(window.location.search);
   const code   = params.get('code');
 
   if (code) {
-    history.replaceState(null, '', window.location.pathname); // clean URL
+    history.replaceState(null, '', window.location.pathname);
     try {
-      const token = await exchangeCodeForToken(code);
-      await onAuth(token);
+      await onAuth(await exchangeCodeForToken(code));
     } catch (err) {
       console.error(err);
-      toast('Login failed — please try again', 'err');
+      toast('Login failed — try again', 'err');
       showEmpty();
     }
     return;
   }
 
-  // Check for a still-valid stored token (e.g. page refresh)
   const stored = getStoredToken();
-  if (stored) {
-    await onAuth(stored);
-    return;
-  }
+  if (stored) { await onAuth(stored); return; }
 
   showEmpty();
 })();
