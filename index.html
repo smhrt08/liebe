@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>artist spotlight //</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── RESET & TOKENS ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0a0a;
+      --surface:   #111111;
+      --border:    #1f1f1f;
+      --border-hi: #2e2e2e;
+      --accent:    #c8ff00;       /* lime */
+      --accent2:   #ff4d6d;       /* coral */
+      --text:      #e8e8e8;
+      --muted:     #555;
+      --mono: 'Ensemble Mono', 'Fira Code', 'Courier New', monospace;
+      --sans: 'Hanken Grotesk', sans-serif;
+      --radius: 2px;
+      --transition: 120ms ease;
+    }
+
+    /* Ensemble Mono via Google Fonts embed fallback */
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    :root { --mono: 'Share Tech Mono', 'Fira Code', monospace; }
+
+    body {
+      font-family: var(--mono);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NOISE OVERLAY ───────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.5;
+    }
+
+    /* ── HEADER ──────────────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 28px 36px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .wordmark {
+      font-family: var(--mono);
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .wordmark span { color: var(--muted); }
+
+    .header-meta {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* ── LAYOUT ──────────────────────────────────────────────────── */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      grid-template-rows: 1fr;
+      height: calc(100vh - 62px);
+    }
+
+    /* ── SIDEBAR ─────────────────────────────────────────────────── */
+    aside {
+      border-right: 1px solid var(--border);
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      overflow-y: auto;
+    }
+
+    .section-label {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* ── BUTTONS ─────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 10px 16px;
+      border: 1px solid var(--border-hi);
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+      border-radius: var(--radius);
+      transition: all var(--transition);
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(200, 255, 0, 0.04);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #d6ff1a;
+      color: #000;
+      border-color: #d6ff1a;
+    }
+
+    .btn-danger {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: rgba(255, 77, 109, 0.08);
+    }
+
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ── INPUTS ──────────────────────────────────────────────────── */
+    .input-wrap { position: relative; }
+
+    input[type="text"], select {
+      width: 100%;
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border-hi);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color var(--transition);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input[type="text"]:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    input[type="text"]::placeholder { color: var(--muted); }
+
+    .search-row {
+      display: flex;
+      gap: 4px;
+    }
+
+    .search-row input { border-radius: var(--radius) 0 0 var(--radius); }
+
+    .search-row .btn {
+      width: auto;
+      padding: 10px 14px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      flex-shrink: 0;
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+
+    /* ── STATUS PILL ─────────────────────────────────────────────── */
+    .status {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .status-dot.ok { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .status-dot.busy {
+      background: #ffbe0b;
+      animation: pulse 1s ease-in-out infinite alternate;
+    }
+    .status-dot.err { background: var(--accent2); }
+
+    @keyframes pulse { from { opacity: 1; } to { opacity: 0.3; } }
+
+    /* ── COMMIT BLOCK ────────────────────────────────────────────── */
+    .commit-block {
+      border: 1px solid var(--border-hi);
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+
+    .commit-target {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      word-break: break-all;
+    }
+
+    .commit-target strong { color: var(--accent); display: block; margin-top: 2px; }
+
+    /* ── CONTENT AREA ────────────────────────────────────────────── */
+    .content {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-header {
+      padding: 18px 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .artist-name {
+      font-size: 22px;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .track-count {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* ── TABLE ───────────────────────────────────────────────────── */
+    .table-wrap {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+
+    th {
+      text-align: left;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 10px 28px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 400;
+    }
+
+    td {
+      padding: 11px 28px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .tr-idx {
+      color: var(--muted);
+      font-size: 10px;
+      width: 40px;
+      user-select: none;
+    }
+
+    .td-track { color: var(--text); max-width: 260px; }
+    .td-artists { color: var(--muted); max-width: 200px; }
+    .td-album { color: var(--muted); font-size: 11px; max-width: 180px; }
+    .td-release { color: var(--muted); white-space: nowrap; }
+
+    .td-pop {
+      width: 80px;
+    }
+
+    .pop-bar {
+      height: 3px;
+      background: var(--border-hi);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .pop-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .truncate {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── EMPTY / LOADING STATES ──────────────────────────────────── */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .empty-glyph {
+      font-size: 32px;
+      opacity: 0.15;
+    }
+
+    /* ── TOAST ───────────────────────────────────────────────────── */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 9999;
+    }
+
+    .toast {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      background: var(--surface);
+      border: 1px solid var(--border-hi);
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      color: var(--text);
+      animation: slideIn 200ms ease forwards;
+      max-width: 320px;
+    }
+
+    .toast.ok { border-left: 3px solid var(--accent); }
+    .toast.err { border-left: 3px solid var(--accent2); }
+    .toast.info { border-left: 3px solid #ffbe0b; }
+
+    @keyframes slideIn {
+      from { transform: translateX(20px); opacity: 0; }
+      to   { transform: translateX(0); opacity: 1; }
+    }
+
+    /* ── SCROLLBAR ───────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
+
+    /* ── RESPONSIVE ──────────────────────────────────────────────── */
+    @media (max-width: 700px) {
+      main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+      aside { border-right: none; border-bottom: 1px solid var(--border); padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────────────────────── -->
+<header>
+  <div class="wordmark">artist spotlight <span>//</span></div>
+  <div class="header-meta" id="header-status">not connected</div>
+</header>
+
+<!-- ── MAIN ────────────────────────────────────────────────────────────── -->
+<main>
+
+  <!-- SIDEBAR -->
+  <aside>
+
+    <!-- Status -->
+    <div>
+      <div class="section-label">Connection</div>
+      <div class="status">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">Awaiting login</span>
+      </div>
+    </div>
+
+    <!-- Login -->
+    <div id="login-block">
+      <div class="section-label">Auth</div>
+      <button class="btn btn-primary" id="login-btn">
+        ↗ Connect Spotify
+      </button>
+    </div>
+
+    <!-- Search -->
+    <div id="search-block" style="display:none">
+      <div class="section-label">Artist Search</div>
+      <div class="search-row">
+        <input type="text" id="artist-input" placeholder="e.g. Floating Points" autocomplete="off" />
+        <button class="btn" id="search-btn">→</button>
+      </div>
+    </div>
+
+    <!-- Playlist -->
+    <div id="playlist-block" style="display:none">
+      <div class="section-label">Target Playlist</div>
+      <select id="playlist-select">
+        <option value="">— select —</option>
+      </select>
+    </div>
+
+    <!-- Commit -->
+    <div id="commit-block" style="display:none">
+      <div class="section-label">Commit</div>
+      <div class="commit-block">
+        <div class="commit-target">
+          Replace contents of:<br/>
+          <strong id="commit-target-name">—</strong>
+        </div>
+        <button class="btn btn-danger" id="commit-btn" disabled>⚡ Replace Playlist</button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- CONTENT -->
+  <div class="content" id="content-area">
+    <div class="empty-state" id="empty-state">
+      <div class="empty-glyph">♫</div>
+      <div>connect spotify to begin</div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── TOASTS ───────────────────────────────────────────────────────────── -->
+<div id="toast-container"></div>
+
+<!-- ── SCRIPT ───────────────────────────────────────────────────────────── -->
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+// !! REPLACE with your actual Spotify app Client ID !!
+// !! Add your GitHub Pages URL as a Redirect URI in the Spotify dashboard !!
+const CLIENT_ID    = 'd2dff7d2d9964cf0ab6bc799a979b24d';
+const REDIRECT_URI = window.location.origin + window.location.pathname;
+const SCOPES       = [
+  'playlist-read-collaborative',
+  'playlist-read-private',
+  'playlist-modify-public',
+  'playlist-modify-private'
+].join(' ');
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let authToken    = null;
+let playlists    = [];
+let artistTracks = [];
+let currentArtistName = '';
+
+// ── DOM REFS ──────────────────────────────────────────────────────────────────
+const $loginBtn       = document.getElementById('login-btn');
+const $searchBlock    = document.getElementById('search-block');
+const $playlistBlock  = document.getElementById('playlist-block');
+const $commitBlock    = document.getElementById('commit-block');
+const $artistInput    = document.getElementById('artist-input');
+const $searchBtn      = document.getElementById('search-btn');
+const $playlistSelect = document.getElementById('playlist-select');
+const $commitBtn      = document.getElementById('commit-btn');
+const $commitTarget   = document.getElementById('commit-target-name');
+const $statusDot      = document.getElementById('status-dot');
+const $statusText     = document.getElementById('status-text');
+const $headerStatus   = document.getElementById('header-status');
+const $contentArea    = document.getElementById('content-area');
+const $emptyState     = document.getElementById('empty-state');
+const $loginBlock     = document.getElementById('login-block');
+
+// ── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg, type = 'info', duration = 3500) {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), duration);
+}
+
+// ── STATUS ────────────────────────────────────────────────────────────────────
+function setStatus(state, text) {
+  $statusDot.className = 'status-dot ' + state;
+  $statusText.textContent = text;
+  if (state === 'ok') $headerStatus.textContent = 'connected';
+  else if (state === 'busy') $headerStatus.textContent = 'working...';
+  else $headerStatus.textContent = 'not connected';
+}
+
+// ── AUTH ─────────────────────────────────────────────────────────────────────
+$loginBtn.addEventListener('click', () => {
+  const url = new URL('https://accounts.spotify.com/authorize');
+  url.searchParams.set('client_id', CLIENT_ID);
+  url.searchParams.set('response_type', 'token');
+  url.searchParams.set('redirect_uri', REDIRECT_URI);
+  url.searchParams.set('scope', SCOPES);
+  window.location = url.toString();
+});
+
+function parseToken() {
+  const hash = window.location.hash.slice(1);
+  if (!hash) return null;
+  const params = new URLSearchParams(hash);
+  const token = params.get('access_token');
+  if (token) {
+    // Clean URL hash without reload
+    history.replaceState(null, '', window.location.pathname);
+    return token;
+  }
+  return null;
+}
+
+async function onAuth(token) {
+  authToken = token;
+  $loginBlock.style.display = 'none';
+  $searchBlock.style.display = '';
+  $playlistBlock.style.display = '';
+  $commitBlock.style.display = '';
+  setStatus('busy', 'Loading playlists…');
+  await loadPlaylists();
+  setStatus('ok', 'Connected');
+  toast('Spotify connected ✓', 'ok');
+}
+
+// ── PLAYLISTS ─────────────────────────────────────────────────────────────────
+async function loadPlaylists() {
+  playlists = [];
+  let url = 'https://api.spotify.com/v1/me/playlists?limit=50';
+  while (url) {
+    const res  = await spotifyGet(url);
+    const data = await res.json();
+    playlists.push(...data.items.filter(p => p.owner.id !== 'spotify'));
+    url = data.next;
+  }
+  $playlistSelect.innerHTML = '<option value="">— select playlist —</option>';
+  playlists.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.name;
+    $playlistSelect.appendChild(opt);
+  });
+}
+
+$playlistSelect.addEventListener('change', () => {
+  const p = playlists.find(x => x.id === $playlistSelect.value);
+  if (p) {
+    $commitTarget.textContent = p.name;
+    $commitBtn.disabled = artistTracks.length === 0;
+  } else {
+    $commitTarget.textContent = '—';
+    $commitBtn.disabled = true;
+  }
+});
+
+// ── SEARCH ───────────────────────────────────────────────────────────────────
+$searchBtn.addEventListener('click', doSearch);
+$artistInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+async function doSearch() {
+  const query = $artistInput.value.trim();
+  if (!query || !authToken) return;
+
+  setStatus('busy', 'Searching…');
+  $searchBtn.disabled = true;
+  showLoading();
+
+  try {
+    // 1. Find artist ID
+    const artistRes  = await spotifyGet(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=artist&limit=1`);
+    const artistData = await artistRes.json();
+    const artist     = artistData.artists?.items?.[0];
+    if (!artist) { toast('Artist not found', 'err'); showEmpty('No results found'); return; }
+
+    const artistId   = artist.id;
+    currentArtistName = artist.name;
+
+    // 2. Paginate track search — collect all pages
+    let allTracks = [];
+    let offset    = 0;
+
+    while (true) {
+      const r = await spotifyGet(
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=50&offset=${offset}`
+      );
+      const d = await r.json();
+      const items = d.tracks?.items || [];
+      allTracks.push(...items);
+      if (items.length < 50 || allTracks.length >= 1000) break;
+      offset += 50;
+    }
+
+    // 3. Filter to artist + deduplicate by name (keep newest)
+    const seen = new Map();
+    allTracks
+      .filter(t => t.artists.some(a => a.id === artistId))
+      .filter(t => !t.album.artists.some(a => a.name === 'Various Artists'))
+      .sort((a, b) => b.album.release_date.localeCompare(a.album.release_date))
+      .forEach(t => {
+        const key = t.name.toLowerCase();
+        if (!seen.has(key)) seen.set(key, t);
+      });
+
+    artistTracks = [...seen.values()];
+    renderTable();
+    setStatus('ok', 'Connected');
+    toast(`Found ${artistTracks.length} tracks`, 'ok');
+
+    if ($playlistSelect.value) $commitBtn.disabled = false;
+  } catch (err) {
+    console.error(err);
+    toast('Search failed — check console', 'err');
+    setStatus('err', 'Error');
+    showEmpty('Search failed');
+  } finally {
+    $searchBtn.disabled = false;
+  }
+}
+
+// ── COMMIT ───────────────────────────────────────────────────────────────────
+$commitBtn.addEventListener('click', async () => {
+  const playlistId = $playlistSelect.value;
+  if (!playlistId || !artistTracks.length) return;
+
+  const playlistName = playlists.find(p => p.id === playlistId)?.name;
+  if (!confirm(`Replace all tracks in "${playlistName}" with ${artistTracks.length} tracks from ${currentArtistName}?`)) return;
+
+  setStatus('busy', 'Replacing playlist…');
+  $commitBtn.disabled = true;
+
+  try {
+    // 1. Delete existing tracks (max 100 at a time)
+    const existing = await fetchAllPlaylistTracks(playlistId);
+    for (let i = 0; i < existing.length; i += 100) {
+      const chunk = existing.slice(i, i + 100).map(t => ({ uri: t.track.uri }));
+      await spotifyDelete(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, { tracks: chunk });
+    }
+
+    // 2. Add new tracks (max 100 at a time)
+    const uris = artistTracks.map(t => t.uri);
+    for (let i = 0; i < uris.length; i += 100) {
+      const chunk = uris.slice(i, i + 100);
+      await spotifyPost(
+        `https://api.spotify.com/v1/playlists/${playlistId}/tracks?uris=${chunk.join(',')}`,
+        {}
+      );
+    }
+
+    toast(`✓ "${playlistName}" updated with ${uris.length} tracks`, 'ok', 5000);
+    setStatus('ok', 'Connected');
+  } catch (err) {
+    console.error(err);
+    toast('Commit failed — check console', 'err');
+    setStatus('err', 'Error');
+  } finally {
+    $commitBtn.disabled = false;
+  }
+});
+
+async function fetchAllPlaylistTracks(playlistId) {
+  let all = [], url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`;
+  while (url) {
+    const r = await spotifyGet(url);
+    const d = await r.json();
+    all.push(...d.items.filter(i => i.track));
+    url = d.next;
+  }
+  return all;
+}
+
+// ── RENDER TABLE ──────────────────────────────────────────────────────────────
+function renderTable() {
+  $contentArea.innerHTML = `
+    <div class="content-header">
+      <div class="artist-name">${escHtml(currentArtistName)}</div>
+      <div class="track-count">${artistTracks.length} tracks</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Track</th>
+            <th>Artists</th>
+            <th>Album</th>
+            <th>Released</th>
+            <th>Pop.</th>
+          </tr>
+        </thead>
+        <tbody id="track-tbody"></tbody>
+      </table>
+    </div>
+  `;
+
+  const tbody = document.getElementById('track-tbody');
+  artistTracks.forEach((t, i) => {
+    const artists = t.artists.map(a => a.name).join(', ');
+    const pop     = t.popularity;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="tr-idx">${i + 1}</td>
+      <td class="td-track truncate">${escHtml(t.name)}</td>
+      <td class="td-artists truncate">${escHtml(artists)}</td>
+      <td class="td-album truncate">${escHtml(t.album.name)}</td>
+      <td class="td-release">${t.album.release_date?.slice(0,4) ?? '—'}</td>
+      <td class="td-pop">
+        <div class="pop-bar"><div class="pop-bar-fill" style="width:${pop}%"></div></div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function showLoading() {
+  $contentArea.innerHTML = `
+    <div class="empty-state">
+      <div class="empty-glyph" style="animation:pulse 1s ease-in-out infinite alternate">♫</div>
+      <div>searching...</div>
+    </div>
+  `;
+}
+
+function showEmpty(msg = 'connect spotify to begin') {
+  $contentArea.innerHTML = `
+    <div class="empty-state">
+      <div class="empty-glyph">♫</div>
+      <div>${msg}</div>
+    </div>
+  `;
+}
+
+// ── SPOTIFY API HELPERS ───────────────────────────────────────────────────────
+function spotifyGet(url) {
+  return fetch(url, { headers: { Authorization: `Bearer ${authToken}` } });
+}
+
+function spotifyPost(url, body) {
+  return fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+}
+
+function spotifyDelete(url, body) {
+  return fetch(url, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+}
+
+function escHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+const token = parseToken();
+if (token) {
+  onAuth(token);
+} else {
+  showEmpty();
+}
+</script>
+</body>
+</html>
