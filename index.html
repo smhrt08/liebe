@@ -534,26 +534,68 @@ function setStatus(state, text) {
   else $headerStatus.textContent = 'not connected';
 }
 
-// ── AUTH ─────────────────────────────────────────────────────────────────────
-$loginBtn.addEventListener('click', () => {
+// ── AUTH (PKCE) ───────────────────────────────────────────────────────────────
+async function generateCodeVerifier() {
+  const array = new Uint8Array(64);
+  crypto.getRandomValues(array);
+  return btoa(String.fromCharCode(...array))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+async function generateCodeChallenge(verifier) {
+  const data = new TextEncoder().encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+$loginBtn.addEventListener('click', async () => {
+  const verifier   = await generateCodeVerifier();
+  const challenge  = await generateCodeChallenge(verifier);
+  sessionStorage.setItem('pkce_verifier', verifier);
+
   const url = new URL('https://accounts.spotify.com/authorize');
   url.searchParams.set('client_id', CLIENT_ID);
-  url.searchParams.set('response_type', 'token');
+  url.searchParams.set('response_type', 'code');
   url.searchParams.set('redirect_uri', REDIRECT_URI);
   url.searchParams.set('scope', SCOPES);
+  url.searchParams.set('code_challenge_method', 'S256');
+  url.searchParams.set('code_challenge', challenge);
   window.location = url.toString();
 });
 
-function parseToken() {
-  const hash = window.location.hash.slice(1);
-  if (!hash) return null;
-  const params = new URLSearchParams(hash);
-  const token = params.get('access_token');
-  if (token) {
-    // Clean URL hash without reload
-    history.replaceState(null, '', window.location.pathname);
-    return token;
-  }
+async function exchangeCodeForToken(code) {
+  const verifier = sessionStorage.getItem('pkce_verifier');
+  sessionStorage.removeItem('pkce_verifier');
+
+  const res = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id:     CLIENT_ID,
+      grant_type:    'authorization_code',
+      code,
+      redirect_uri:  REDIRECT_URI,
+      code_verifier: verifier
+    })
+  });
+
+  if (!res.ok) throw new Error('Token exchange failed');
+  const data = await res.json();
+
+  // Store token + expiry
+  authToken = data.access_token;
+  const expiry = Date.now() + data.expires_in * 1000;
+  sessionStorage.setItem('spotify_token', authToken);
+  sessionStorage.setItem('spotify_token_expiry', expiry);
+
+  return authToken;
+}
+
+function getStoredToken() {
+  const token  = sessionStorage.getItem('spotify_token');
+  const expiry = sessionStorage.getItem('spotify_token_expiry');
+  if (token && expiry && Date.now() < Number(expiry)) return token;
   return null;
 }
 
@@ -811,12 +853,33 @@ function escHtml(str) {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-const token = parseToken();
-if (token) {
-  onAuth(token);
-} else {
+(async () => {
+  // Check if returning from Spotify with ?code=
+  const params = new URLSearchParams(window.location.search);
+  const code   = params.get('code');
+
+  if (code) {
+    history.replaceState(null, '', window.location.pathname); // clean URL
+    try {
+      const token = await exchangeCodeForToken(code);
+      await onAuth(token);
+    } catch (err) {
+      console.error(err);
+      toast('Login failed — please try again', 'err');
+      showEmpty();
+    }
+    return;
+  }
+
+  // Check for a still-valid stored token (e.g. page refresh)
+  const stored = getStoredToken();
+  if (stored) {
+    await onAuth(stored);
+    return;
+  }
+
   showEmpty();
-}
+})();
 </script>
 </body>
 </html>
